@@ -67,11 +67,8 @@ A powerful and modular payload generation tool for web security testing and expl
 ### Setup
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/WebPayloadForge.git
-
-# Navigate to the project directory
+git clone https://github.com/Kamii221/WebPayloadForge.git
 cd WebPayloadForge
-
 # Create a virtual environment (recommended)
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
