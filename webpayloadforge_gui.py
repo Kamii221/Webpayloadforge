@@ -144,10 +144,9 @@ class WebPayloadForgeGUI:
             for payload in payloads:
                 self.output_area.insert(tk.END, f"{payload}\n")
 
-            # Handle output options
-            if self.clipboard_var.get():
-                pyperclip.copy('\n'.join(payloads))
-                messagebox.showinfo("Success", "Payloads copied to clipboard")
+            # Always copy to clipboard
+            pyperclip.copy('\n'.join(payloads))
+            messagebox.showinfo("Success", "Payloads copied to clipboard")
 
             if self.json_var.get():
                 with open('payloads.json', 'w', encoding='utf-8') as f:
