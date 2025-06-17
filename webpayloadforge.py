@@ -244,13 +244,14 @@ def main():
         parser.print_help()
         return
 
+    # Always copy to clipboard
+    generator.copy_to_clipboard(payloads)
+    print("\nPayloads copied to clipboard")
+
     if args.output == 'json':
         filename = args.file or 'payloads.json'
         generator.save_to_json(payloads, filename)
         print(f"\nPayloads saved to {filename}")
-    elif args.output == 'clipboard':
-        generator.copy_to_clipboard(payloads)
-        print("\nPayloads copied to clipboard")
 
 if __name__ == '__main__':
     main() 
