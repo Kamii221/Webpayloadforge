@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import json
@@ -7,12 +8,16 @@ import threading
 import requests
 from urllib.parse import urlparse
 
+# Create res/payloads directory if it doesn't exist
+os.makedirs('res/payloads', exist_ok=True)
+
 class WebPayloadForgeGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("WebPayloadForge")
         self.root.geometry("800x600")
         self.generator = PayloadGenerator()
+        self.payloads_dir = 'res/payloads'
         self.setup_gui()
 
     def setup_gui(self):
@@ -57,17 +62,35 @@ class WebPayloadForgeGUI:
         self.json_var = tk.BooleanVar()
         ttk.Checkbutton(self.output_frame, text="JSON", variable=self.json_var).pack(side=tk.LEFT)
 
-        # Burp Suite Integration
-        ttk.Label(main_frame, text="Burp Suite URL:").grid(row=6, column=0, sticky=tk.W)
-        self.burp_url = ttk.Entry(main_frame, width=40)
-        self.burp_url.grid(row=6, column=1, sticky=tk.W)
+        # ZAP Proxy Integration
+        ttk.Label(main_frame, text="ZAP Target URL:").grid(row=6, column=0, sticky=tk.W)
+        self.zap_target_url = ttk.Entry(main_frame, width=40)
+        self.zap_target_url.grid(row=6, column=1, sticky=tk.W)
+
+        ttk.Label(main_frame, text="ZAP API URL:").grid(row=7, column=0, sticky=tk.W)
+        self.zap_api_url = ttk.Entry(main_frame, width=40)
+        self.zap_api_url.grid(row=7, column=1, sticky=tk.W)
+
+        ttk.Label(main_frame, text="ZAP API Key:").grid(row=8, column=0, sticky=tk.W)
+        self.zap_api_key = ttk.Entry(main_frame, width=40, show='*')
+        self.zap_api_key.grid(row=8, column=1, sticky=tk.W)
+
+        ttk.Label(main_frame, text="HTTP Method:").grid(row=9, column=0, sticky=tk.W)
+        self.http_method = ttk.Combobox(main_frame, values=["GET", "POST"])
+        self.http_method.set("GET")
+        self.http_method.grid(row=9, column=1, sticky=tk.W)
+
+        ttk.Label(main_frame, text="Parameter:").grid(row=10, column=0, sticky=tk.W)
+        self.param = ttk.Entry(main_frame, width=20)
+        self.param.insert(0, "id")
+        self.param.grid(row=10, column=1, sticky=tk.W)
 
         # Generate Button
-        ttk.Button(main_frame, text="Generate Payloads", command=self.generate_payloads).grid(row=7, column=0, columnspan=2, pady=10)
+        ttk.Button(main_frame, text="Generate Payloads", command=self.generate_payloads).grid(row=11, column=0, columnspan=2, pady=10)
 
         # Output Area
         self.output_area = scrolledtext.ScrolledText(main_frame, width=80, height=20)
-        self.output_area.grid(row=8, column=0, columnspan=2, pady=10)
+        self.output_area.grid(row=12, column=0, columnspan=2, pady=10)
 
     def update_subtype(self, event=None):
         payload_type = self.payload_type.get()
@@ -93,31 +116,20 @@ class WebPayloadForgeGUI:
             return self.obfuscate_payload(payload, "Mixed Case")
         return payload
 
-    def send_to_burp(self, payload):
+    def send_to_zap(self, payloads):
+        target_url = self.zap_target_url.get()
+        api_url = self.zap_api_url.get()
+        api_key = self.zap_api_key.get()
+        method = self.http_method.get()
+        param = self.param.get()
+        if not (target_url and api_url and api_key):
+            messagebox.showerror("Error", "ZAP Target URL, API URL, and API Key are required.")
+            return
         try:
-            burp_url = self.burp_url.get()
-            if not burp_url:
-                return False
-
-            # Parse the URL to get the host and port
-            parsed_url = urlparse(burp_url)
-            if not parsed_url.scheme or not parsed_url.netloc:
-                messagebox.showerror("Error", "Invalid Burp Suite URL")
-                return False
-
-            # Send the payload to Burp Suite
-            headers = {'Content-Type': 'application/json'}
-            data = {'payload': payload}
-            response = requests.post(burp_url, json=data, headers=headers)
-            
-            if response.status_code == 200:
-                return True
-            else:
-                messagebox.showerror("Error", f"Failed to send to Burp Suite: {response.status_code}")
-                return False
+            self.generator.send_to_zap(payloads, target_url, api_url, api_key, method, param)
+            messagebox.showinfo("Success", "Payloads sent to ZAP proxy.")
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to send to Burp Suite: {str(e)}")
-            return False
+            messagebox.showerror("Error", f"Failed to send to ZAP: {str(e)}")
 
     def generate_payloads(self):
         try:
@@ -149,14 +161,14 @@ class WebPayloadForgeGUI:
             messagebox.showinfo("Success", "Payloads copied to clipboard")
 
             if self.json_var.get():
-                with open('payloads.json', 'w', encoding='utf-8') as f:
+                filename = os.path.join(self.payloads_dir, 'payloads.json')
+                with open(filename, 'w', encoding='utf-8') as f:
                     json.dump(payloads, f, indent=4)
-                messagebox.showinfo("Success", "Payloads saved to payloads.json")
+                messagebox.showinfo("Success", f"Payloads saved to {filename}")
 
-            # Send to Burp Suite if URL is provided
-            if self.burp_url.get():
-                for payload in payloads:
-                    self.send_to_burp(payload)
+            # Send to ZAP proxy if all required fields are filled
+            if self.zap_target_url.get() and self.zap_api_url.get() and self.zap_api_key.get():
+                self.send_to_zap(payloads)
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
